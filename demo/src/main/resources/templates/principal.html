@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Fitness - Sistema de Gestión</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    .dashboard-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .stat-card {
+      border-left: 4px solid;
+      border-radius: 4px;
+    }
+    .bg-gradient-primary {
+      background: linear-gradient(45deg, #4e73df, #224abe);
+    }
+    .bg-gradient-success {
+      background: linear-gradient(45deg, #1cc88a, #13855c);
+    }
+    .bg-gradient-info {
+      background: linear-gradient(45deg, #36b9cc, #258391);
+    }
+    .bg-gradient-warning {
+      background: linear-gradient(45deg, #f6c23e, #dda20a);
+    }
+    .sidebar {
+      min-height: calc(100vh - 56px);
+      background-color: #212529;
+    }
+    .sidebar-item {
+      border-radius: 0;
+      color: rgba(255, 255, 255, 0.8);
+      border-left: 4px solid transparent;
+    }
+    .sidebar-item:hover, .sidebar-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-left-color: #4e73df;
+    }
+    .main-content {
+      min-height: calc(100vh - 56px);
+    }
+    .profile-dropdown .dropdown-toggle::after {
+      display: none;
+    }
+    #calendar .table td {
+      height: 60px;
+      vertical-align: top;
+    }
+    .footer {
+      background-color: #f8f9fc;
+      padding: 1rem 0;
+      margin-top: auto;
+    }
+    .btn-generar-pdf {
+      background: linear-gradient(45deg, #4e73df, #224abe);
+      border: none;
+      transition: all 0.3s ease;
+    }
+    .btn-generar-pdf:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(78, 115, 223, 0.3);
+    }
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 50px;
+    }
+    .timeline:before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e9ecef;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .timeline-badge {
+      position: absolute;
+      left: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transform: translateX(-50%);
+      margin-left: 20px;
+    }
+    .timeline-panel {
+      position: relative;
+      background: #f8f9fc;
+      border-radius: 6px;
+      padding: 15px;
+    }
+  </style>
+</head>
+<body class="d-flex flex-column">
+
+  <!-- Navbar Superior -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <i class="fas fa-dumbbell me-2"></i>
+        <span>Home Fitness</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <!-- Buscador -->
+        <form class="d-flex ms-auto me-3">
+          <div class="input-group">
+            <input class="form-control" type="search" placeholder="Buscar cliente..." aria-label="Buscar">
+            <button class="btn btn-outline-light" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+        
+        <!-- Notificaciones y Perfil -->
+        <ul class="navbar-nav">
+          <!-- Notificaciones -->
+          <li class="nav-item dropdown me-2">
+            <a class="nav-link dropdown-toggle position-relative" href="#" id="notificacionesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-bell"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                3
+              </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificacionesDropdown">
+              <li><h6 class="dropdown-header">Centro de Notificaciones</h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-user-plus me-2 text-primary"></i>Nuevo registro de cliente</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Stock bajo de proteínas</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-dollar-sign me-2 text-success"></i>Nuevo pago recibido</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-center small" href="#">Mostrar todas las notificaciones</a></li>
+            </ul>
+          </li>
+          
+          <!-- Perfil -->
+          <li class="nav-item dropdown profile-dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="perfilDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="me-2 d-none d-lg-inline text-white small">Admin</span>
+              <i class="fas fa-user-circle fa-lg"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
+              <li><a class="dropdown-item" href="#"><i class="fas fa-user fa-sm me-2 text-gray-400"></i>Perfil</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-cogs fa-sm me-2 text-gray-400"></i>Configuración</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-list fa-sm me-2 text-gray-400"></i>Registro actividad</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form id="logoutForm" action="/logout" method="POST" style="display: none;"></form>
+                <a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit();">
+                  <i class="fas fa-sign-out-alt fa-sm me-2 text-gray-400"></i>Cerrar sesión
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar / Menú lateral -->
+      <div class="col-lg-2 px-0 d-none d-lg-block">
+        <div class="sidebar py-3">
+          <div class="text-center my-4">
+            <img src="/imagenes/logo.png" alt="Logo" style="width: 60px; height: 60px;" class="rounded-circle mb-2">
+            <h6 class="text-white mb-0">Sistema de Gestión</h6>
+          </div>
+          
+          <hr class="bg-light mx-3">
+          
+          <ul class="nav flex-column mt-2">
+            <!-- Elementos comunes a todos los roles -->
+            <li class="nav-item">
+              <a class="nav-link sidebar-item active" href="/">
+                <i class="fas fa-fw fa-tachometer-alt me-2"></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+
+            <!-- RECEPCION: Menú específico -->
+            <div sec:authorize="hasRole('RECEPCION')">
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Registro_Cliente">
+                  <i class="fas fa-fw fa-user-plus me-2"></i>
+                  <span>Registro Cliente</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Pago_entrada">
+                  <i class="fas fa-fw fa-money-bill me-2"></i>
+                  <span>Pagos Entrada</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Asignar_menbresia">
+                  <i class="fas fa-fw fa-id-card me-2"></i>
+                  <span>Membresías</span>
+                </a>
+              </li>
+            </div>
+
+            <!-- ADMINISTRATIVO: Menú completo -->
+            <div sec:authorize="hasRole('ADMINISTRATIVO')">
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Registro_Cliente">
+                  <i class="fas fa-fw fa-user-plus me-2"></i>
+                  <span>Registro Cliente</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Pago_entrada">
+                  <i class="fas fa-fw fa-money-bill me-2"></i>
+                  <span>Pagos Entrada</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Asignar_menbresia">
+                  <i class="fas fa-fw fa-id-card me-2"></i>
+                  <span>Membresías</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Inventario">
+                  <i class="fas fa-fw fa-boxes me-2"></i>
+                  <span>Inventario</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/finanzas">
+                  <i class="fas fa-fw fa-chart-line me-2"></i>
+                  <span>Finanzas</span>
+                </a>
+              </li>
+              
+              <li class="nav-item mt-3">
+                <hr class="bg-light mx-3">
+                <h6 class="text-white-50 small px-3 mb-2">HERRAMIENTAS</h6>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/">
+                  <i class="fas fa-fw fa-calendar me-2"></i>
+                  <span>Agenda</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/Empleados">
+                  <i class="fas fa-fw fa-users me-2"></i>
+                  <span>Empleados</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/">
+                  <i class="fas fa-fw fa-cog me-2"></i>
+                  <span>Configuración</span>
+                </a>
+              </li>
+            </div>
+
+            <!-- ENTRENADOR: Menú específico -->
+            <div sec:authorize="hasRole('ENTRENADOR')">
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/agenda">
+                  <i class="fas fa-fw fa-calendar me-2"></i>
+                  <span>Agenda</span>
+                </a>
+              </li>
+            </div>
+
+            <!-- LIMPIEZA: Menú específico -->
+            <div sec:authorize="hasRole('LIMPIEZA')">
+              <li class="nav-item">
+                <a class="nav-link sidebar-item" href="/inventario">
+                  <i class="fas fa-fw fa-boxes me-2"></i>
+                  <span>Inventario</span>
+                </a>
+              </li>
+            </div>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Contenido principal -->
+      <div class="col-lg-10 main-content bg-light">
+        <!-- Encabezado -->
+        <div class="container-fluid py-4">
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+          </div>
+          
+                    <!-- Accesos rápidos -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
+                  <h6 class="m-0 font-weight-bold text-primary">Accesos Rápidos</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-3 col-sm-6 mb-4">
+                      <a href="/Registro_Cliente" class="text-decoration-none">
+                        <div class="card dashboard-card text-center h-100">
+                          <div class="card-body">
+                            <i class="fas fa-user-plus card-icon text-primary"></i>
+                            <h5 class="card-title">Registrar Cliente</h5>
+                            <p class="card-text small text-muted">Añade nuevos clientes al sistema</p>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-4">
+                      <a href="/Pago_entrada" class="text-decoration-none">
+                        <div class="card dashboard-card text-center h-100">
+                          <div class="card-body">
+                            <i class="fas fa-money-bill card-icon text-success"></i>
+                            <h5 class="card-title">Pago Entrada</h5>
+                            <p class="card-text small text-muted">Registra pagos de entrada diaria</p>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-4">
+                      <a href="/Asignar_menbresia" class="text-decoration-none">
+                        <div class="card dashboard-card text-center h-100">
+                          <div class="card-body">
+                            <i class="fas fa-id-card card-icon text-info"></i>
+                            <h5 class="card-title">Membresía</h5>
+                            <p class="card-text small text-muted">Asigna o renueva membresías</p>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-4">
+                      <a href="/Inventario" class="text-decoration-none">
+                        <div class="card dashboard-card text-center h-100">
+                          <div class="card-body">
+                            <i class="fas fa-boxes card-icon text-warning"></i>
+                            <h5 class="card-title">Inventario</h5>
+                            <p class="card-text small text-muted">Gestiona productos y suplementos</p>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Resumen Ejecutivo -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
+                  <h6 class="m-0 font-weight-bold text-primary">Home Fitness - Visión General</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-md-3 text-center mb-4 mb-md-0">
+                      <img src="/imagenes/logo.png" alt="Logo Home Fitness" class="img-fluid" style="max-height: 150px;">
+                    </div>
+                    <div class="col-md-9">
+                      <div class="mb-3">
+                        <h5 class="text-primary">Home Fitness</h5>
+                        <p class="mb-0">Solución integral en acondicionamiento físico y bienestar, combinando servicios de gimnasio con venta de productos deportivos.</p>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="d-flex mb-3">
+                            <i class="fas fa-eye me-2 text-primary mt-1"></i>
+                            <div>
+                              <h6 class="mb-1">Visión</h6>
+                              <p class="small mb-0">Ser el gimnasio más innovador y completo de la ciudad, promoviendo salud mediante tecnología y expansión.</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="d-flex mb-3">
+                            <i class="fas fa-bullseye me-2 text-primary mt-1"></i>
+                            <div>
+                              <h6 class="mb-1">Misión</h6>
+                              <p class="small mb-0">Brindar entrenamiento físico con enfoque personalizado, tecnología y servicios adaptados al cliente.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modelo de Negocio y Planes -->
+
+          <!-- Fila inferior - Reloj -->
+          <div class="row">
+            <!-- Reloj analógico -->
+            <div class="col-lg-6 offset-lg-3 mb-4">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white">
+                  <h6 class="m-0 font-weight-bold text-primary text-center">Reloj en tiempo real</h6>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                  <canvas id="relojCanvas" width="250" height="250"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-auto">
+    <div class="container-fluid">
+      <div class="text-center">
+        <span class="text-muted">&copy; 2025 Home Fitness. Todos los derechos reservados.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+  
+  <script>
+    // Reloj analógico
+    const canvas = document.getElementById("relojCanvas");
+    const ctxReloj = canvas.getContext("2d");
+    const radio = canvas.height / 2;
+
+    ctxReloj.translate(radio, radio);
+
+    setInterval(dibujarReloj, 1000);
+
+    function dibujarReloj() {
+      dibujarCaratula(ctxReloj, radio);
+      dibujarNumeros(ctxReloj, radio);
+      dibujarHora(ctxReloj, radio);
+    }
+
+    function dibujarCaratula(ctx, r) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.95, 0, 2 * Math.PI);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = '#4e73df';
+      ctx.lineWidth = r * 0.05;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.05, 0, 2 * Math.PI);
+      ctx.fillStyle = '#4e73df';
+      ctx.fill();
+    }
+
+    function dibujarNumeros(ctx, r) {
+      ctx.font = r * 0.15 + "px Arial";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      for (let num = 1; num <= 12; num++) {
+        const ang = num * Math.PI / 6;
+        ctx.rotate(ang);
+        ctx.translate(0, -r * 0.85);
+        ctx.rotate(-ang);
+        ctx.fillText(num.toString(), 0, 0);
+        ctx.rotate(ang);
+        ctx.translate(0, r * 0.85);
+        ctx.rotate(-ang);
+      }
+    }
+
+    function dibujarHora(ctx, r) {
+      const ahora = new Date();
+      let hora = ahora.getHours();
+      let minuto = ahora.getMinutes();
+      let segundo = ahora.getSeconds();
+      hora = hora % 12;
+      hora = (hora * Math.PI / 6) +
+             (minuto * Math.PI / (6 * 60)) +
+             (segundo * Math.PI / (360 * 60));
+      dibujarManecilla(ctx, hora, r * 0.5, r * 0.07);
+      minuto = (minuto * Math.PI / 30) + (segundo * Math.PI / (30 * 60));
+      dibujarManecilla(ctx, minuto, r * 0.75, r * 0.07);
+      segundo = (segundo * Math.PI / 30);
+      dibujarManecilla(ctx, segundo, r * 0.85, r * 0.02, "#e74a3b");
+    }
+
+    function dibujarManecilla(ctx, pos, length, width, color = "#333") {
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = color;
+      ctx.moveTo(0, 0);
+      ctx.rotate(pos);
+      ctx.lineTo(0, -length);
+      ctx.stroke();
+      ctx.rotate(-pos);
+    }
+
+    // Configurar Chart.js para el gráfico de ingresos
+    const ctx = document.getElementById('ingresosChart').getContext('2d');
+    const ingresosChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
+        datasets: [{
+          label: 'Ingresos (S/)',
+          data: [6800, 7200, 6500, 8100, 7800, 8450],
+          borderColor: '#4e73df',
+          backgroundColor: 'rgba(78, 115, 223, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return 'S/ ' + value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Calendario
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const currentDate = today.getDate();
+
+    document.getElementById("calendar-month").textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const calendarBody = document.getElementById("calendar-body");
+
+    let date = 1;
+    for (let i = 0; i < 6; i++) {
+      const row = document.createElement("tr");
+
+      for (let j = 0; j < 7; j++) {
+        const cell = document.createElement("td");
+
+        if (i === 0 && j < firstDay) {
+          cell.innerHTML = "";
+        } else if (date > daysInMonth) {
+          cell.innerHTML = "";
+        } else {
+          cell.textContent = date;
+          if (date === currentDate) {
+            cell.classList.add("bg-primary", "text-white");
+          }
+          date++;
+        }
+
+        row.appendChild(cell);
+      }
+
+      calendarBody.appendChild(row);
+      if (date > daysInMonth) break;
+    }
+  </script>
+</body>
+</html>

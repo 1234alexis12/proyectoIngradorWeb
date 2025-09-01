@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{pago.titulo}">Pagar Entrada - Home Fitness</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #212529;
+        }
+
+        .sidebar-item {
+            border-radius: 0;
+            color: rgba(255, 255, 255, 0.8);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #4e73df;
+        }
+        
+        .search-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+        
+        .table-responsive {
+            margin-top: 15px;
+        }
+        
+        .resultados-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .comprobante-link {
+            cursor: pointer;
+            color: #0d6efd;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column">
+
+<!-- NAVBAR superior -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" th:href="@{/principal}">
+      <i class="fas fa-dumbbell me-2"></i>
+      <span th:text="#{nav.logo}">Home Fitness</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Buscador -->
+      <form class="d-flex ms-auto me-3">
+        <div class="input-group">
+          <input class="form-control" type="search" th:placeholder="#{nav.buscador.placeholder}" aria-label="Buscar">
+          <button class="btn btn-outline-light" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Notificaciones y Perfil -->
+      <ul class="navbar-nav">
+        <!-- Notificaciones -->
+        <li class="nav-item dropdown me-2">
+          <a class="nav-link dropdown-toggle position-relative" href="#" id="notificacionesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              3
+            </span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificacionesDropdown">
+            <li><h6 class="dropdown-header" th:text="#{nav.notificaciones.titulo}">Centro de Notificaciones</h6></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-user-plus me-2 text-primary"></i><span th:text="#{nav.notificaciones.nuevo_cliente}">Nuevo registro de cliente</span></a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle me-2 text-warning"></i><span th:text="#{nav.notificaciones.stock_bajo}">Stock bajo de proteínas</span></a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-dollar-sign me-2 text-success"></i><span th:text="#{nav.notificaciones.nuevo_pago}">Nuevo pago recibido</span></a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-center small" href="#" th:text="#{nav.notificaciones.ver_todas}">Mostrar todas las notificaciones</a></li>
+          </ul>
+        </li>
+
+        <!-- Perfil -->
+        <li class="nav-item dropdown profile-dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="perfilDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="me-2 d-none d-lg-inline text-white small" th:text="#{nav.usuario}">Admin</span>
+            <i class="fas fa-user-circle fa-lg"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
+            <li><a class="dropdown-item" href="#"><i class="fas fa-user fa-sm me-2 text-gray-400"></i><span th:text="#{nav.perfil.perfil}">Perfil</span></a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-cogs fa-sm me-2 text-gray-400"></i><span th:text="#{nav.perfil.configuracion}">Configuración</span></a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-list fa-sm me-2 text-gray-400"></i><span th:text="#{nav.perfil.registro}">Registro actividad</span></a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt fa-sm me-2 text-gray-400"></i><span th:text="#{nav.perfil.cerrar_sesion}">Cerrar sesión</span></a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENIDO -->
+<div class="container-fluid">
+  <div class="row">
+  
+    <!-- SIDEBAR izquierdo -->
+    <div class="col-lg-2 px-0 d-none d-lg-block">
+      <div class="sidebar py-3">
+        <div class="text-center my-4">
+          <img src="/imagenes/logo.png" alt="Logo" style="width: 60px; height: 60px;" class="rounded-circle mb-2">
+          <h6 class="text-white mb-0" th:text="#{sidebar.titulo}">Sistema de Gestión</h6>
+        </div>
+
+        <hr class="bg-light mx-3">
+
+        <ul class="nav flex-column mt-2">
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/principal">
+              <i class="fas fa-fw fa-tachometer-alt me-2"></i>
+              <span th:text="#{sidebar.dashboard}">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/Registro_Cliente">
+              <i class="fas fa-fw fa-user-plus me-2"></i>
+              <span th:text="#{sidebar.registro_cliente}">Registro Cliente</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/Pago_entrada">
+              <i class="fas fa-fw fa-money-bill me-2"></i>
+              <span th:text="#{sidebar.pagos_entrada}">Pagos Entrada</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/Asignar_menbresia">
+              <i class="fas fa-fw fa-id-card me-2"></i>
+              <span th:text="#{sidebar.membresias}">Membresías</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/Inventario">
+              <i class="fas fa-fw fa-boxes me-2"></i>
+              <span th:text="#{sidebar.inventario}">Inventario</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/finanzas">
+              <i class="fas fa-fw fa-chart-line me-2"></i>
+              <span th:text="#{sidebar.finanzas}">Finanzas</span>
+            </a>
+          </li>
+
+          <li class="nav-item mt-3">
+            <hr class="bg-light mx-3">
+            <h6 class="text-white-50 small px-3 mb-2" th:text="#{sidebar.herramientas}">HERRAMIENTAS</h6>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="#">
+              <i class="fas fa-fw fa-calendar me-2"></i>
+              <span th:text="#{sidebar.agenda}">Agenda</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="/Empleados">
+              <i class="fas fa-fw fa-users me-2"></i>
+              <span th:text="#{sidebar.empleados}">Empleados</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sidebar-item" href="#">
+              <i class="fas fa-fw fa-cog me-2"></i>
+              <span th:text="#{sidebar.configuracion}">Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FORMULARIO contenido principal -->
+    <div class="col-lg-10 d-flex align-items-center justify-content-center bg-light" style="min-height: calc(100vh - 56px);">
+      <div class="card shadow-lg p-4" style="max-width: 800px; width: 100%;">
+        <h2 class="text-center text-primary mb-4">
+          <i class="fas fa-money-bill-wave me-2"></i>
+          <span th:text="#{pago.titulo}">Pagar Entrada</span>
+        </h2>
+
+        <form th:action="@{/entrada/pagar}" method="post">
+  <div class="mb-3">
+    <label for="dni" class="form-label" th:text="#{pago.form.dni}">DNI del Cliente:</label>
+    <input type="text" class="form-control" id="dni" name="dni"
+           th:placeholder="#{pago.form.dni.placeholder}" required
+           pattern="^\d{8}$" maxlength="8"
+           title="El DNI debe contener exactamente 8 números. No se permiten letras.">
+    <div class="invalid-feedback">
+      Por favor, ingrese un DNI válido de 8 números.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="monto" class="form-label" th:text="#{pago.form.monto}">Monto de Entrada (S/):</label>
+    <input type="number" step="0.01" class="form-control" id="monto" name="monto"
+           th:placeholder="#{pago.form.monto.placeholder}" required min="0.1"
+           title="Ingrese un monto válido mayor a 0.">
+  </div>
+
+  <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-success">
+      <i class="fas fa-check-circle me-1"></i>
+      <span th:text="#{pago.boton.pagar}">Pagar Entrada</span>
+    </button>
+    <a th:href="@{/}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>
+      <span th:text="#{pago.boton.volver}">Volver al inicio</span>
+    </a>
+  </div>
+</form>
+
+
+        <!-- Mensaje de pago -->
+        <div th:if="${mensaje}" class="alert alert-success mt-4">
+          <p th:text="${mensaje}"></p>
+          <p><strong th:text="#{pago.mensaje.dni}">DNI:</strong> <span th:text="${dni}"></span></p>
+          <p><strong th:text="#{pago.mensaje.monto}">Monto:</strong> S/ <span th:text="${monto}"></span></p>
+          <p th:if="${id}">
+            <a th:href="@{/entrada/pagar?id={id}(id=${id})}" 
+               class="comprobante-link" 
+               onclick="this.href += '&dni=' + encodeURIComponent(document.getElementById('dni').value) + '&monto=' + document.getElementById('monto').value">
+              <i class="fas fa-download me-1"></i> Descargar comprobante
+            </a>
+          </p>
+        </div>
+        
+        <!-- Sección de búsqueda -->
+        <div class="search-section">
+            <h4 class="text-center mb-3"><i class="fas fa-search me-2"></i>Buscar Entradas</h4>
+            <form th:action="@{/entrada/buscar}" method="post" class="mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="dni" 
+                           th:value="${dniBuscado}" 
+                           placeholder="Ingrese DNI del cliente" required>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search me-1"></i> Buscar
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Mensaje de búsqueda -->
+            <div th:if="${mensajeBusqueda}" class="alert" 
+                 th:classappend="${mensajeBusqueda.startsWith('✅') ? 'alert-success' : 
+                                 (mensajeBusqueda.startsWith('❌') ? 'alert-danger' : 'alert-info')}">
+                <span th:text="${mensajeBusqueda}"></span>
+            </div>
+            
+            <!-- Resultados de búsqueda -->
+            <div th:if="${entradas != null}" class="resultados-container">
+                <div th:if="${!entradas.empty}" class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>DNI Cliente</th>
+                                <th>Monto</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entrada : ${entradas}">
+                                <td th:text="${entrada.id}"></td>
+                                <td th:text="${entrada.dniCliente}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entrada.monto, 1, 2)}"></span></td>
+                                <td th:text="${#temporals.format(entrada.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <form th:action="@{/entrada/eliminar}" method="post" style="display: inline;">
+                                        <input type="hidden" name="id" th:value="${entrada.id}">
+                                        <input type="hidden" name="dniBuscado" th:value="${dniBuscado}">
+                                        <button type="submit" class="btn btn-danger btn-sm" 
+                                                onclick="return confirm('¿Está seguro de eliminar esta entrada?')">
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${totalGastado}" class="mt-2 text-end fw-bold">
+                        Total gastado: S/ <span th:text="${#numbers.formatDecimal(totalGastado, 1, 2)}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dniInput = document.getElementById('dni');
+
+    dniInput.addEventListener('input', function () {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    dniInput.addEventListener('invalid', function () {
+      this.setCustomValidity('El DNI debe contener exactamente 8 números. No se permiten letras.');
+    });
+
+    dniInput.addEventListener('input', function () {
+      this.setCustomValidity('');
+    });
+  });
+    // Función para manejar la descarga del comprobante
+    document.addEventListener('DOMContentLoaded', function() {
+        const comprobanteLinks = document.querySelectorAll('.comprobante-link');
+        comprobanteLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const dni = document.getElementById('dni').value;
+                const monto = document.getElementById('monto').value;
+                const url = this.href + '&dni=' + encodeURIComponent(dni) + '&monto=' + monto;
+                window.location.href = url;
+            });
+        });
+    });
+</script>
+</body>
+</html>
